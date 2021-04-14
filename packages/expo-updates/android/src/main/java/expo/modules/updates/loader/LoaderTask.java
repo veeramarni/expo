@@ -20,7 +20,7 @@ import expo.modules.updates.db.entity.AssetEntity;
 import expo.modules.updates.db.entity.UpdateEntity;
 import expo.modules.updates.launcher.DatabaseLauncher;
 import expo.modules.updates.launcher.Launcher;
-import expo.modules.updates.launcher.SelectionPolicy;
+import expo.modules.updates.selectionpolicy.SelectionPolicy;
 import expo.modules.updates.manifest.Manifest;
 import expo.modules.updates.manifest.ManifestMetadata;
 
