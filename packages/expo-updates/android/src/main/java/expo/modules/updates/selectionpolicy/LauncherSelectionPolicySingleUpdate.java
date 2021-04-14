@@ -3,6 +3,7 @@ package expo.modules.updates.selectionpolicy;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.UUID;
 
 import expo.modules.updates.db.entity.UpdateEntity;
 
@@ -11,16 +12,16 @@ import expo.modules.updates.db.entity.UpdateEntity;
  */
 public class LauncherSelectionPolicySingleUpdate implements LauncherSelectionPolicy {
 
-  private UpdateEntity mUpdate;
+  private UUID mUpdateID;
 
-  public LauncherSelectionPolicySingleUpdate(UpdateEntity update) {
-    mUpdate = update;
+  public LauncherSelectionPolicySingleUpdate(UUID updateID) {
+    mUpdateID = updateID;
   }
 
   @Override
   public UpdateEntity selectUpdateToLaunch(List<UpdateEntity> updates, JSONObject filters) {
     for (UpdateEntity update : updates) {
-      if (update.id.equals(mUpdate.id)) {
+      if (update.id.equals(mUpdateID)) {
         return update;
       }
     }

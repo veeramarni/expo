@@ -2,10 +2,17 @@ package expo.modules.updates;
 
 import android.content.Context;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import androidx.annotation.Nullable;
+
+import org.json.JSONObject;
+
+import expo.modules.updates.db.DatabaseIntegrityCheck;
 import expo.modules.updates.db.UpdatesDatabase;
 import expo.modules.updates.db.entity.AssetEntity;
 import expo.modules.updates.db.entity.UpdateEntity;
@@ -16,11 +23,64 @@ import expo.modules.updates.selectionpolicy.LauncherSelectionPolicySingleUpdate;
 import expo.modules.updates.selectionpolicy.SelectionPolicy;
 
 public class UpdatesDevClientInterfaceImpl implements UpdatesDevClientInterface {
+
+  class UpdateImpl implements Update {
+    private UUID mID;
+    private Date mPublishedDate;
+    private File mBundlePath;
+    private JSONObject mManifest;
+
+    public UpdateImpl(UUID id, Date publishedDate, File bundlePath, @Nullable JSONObject manifest) {
+      mID = id;
+      mPublishedDate = publishedDate;
+      mBundlePath = bundlePath;
+      mManifest = manifest;
+    }
+
+    public UUID getID() {
+      return mID;
+    }
+
+    public Date getPublishedDate() {
+      return mPublishedDate;
+    }
+
+    public File getBundlePath() {
+      return mBundlePath;
+    }
+
+    public @Nullable JSONObject getManifest() {
+      return mManifest;
+    }
+  }
+
   @Override
-  public List<UpdateEntity> getAvailableUpdates() {
+  public List<Update> getAvailableUpdates() {
     // TODO: should this get any embedded updates as well?
-    // need to check on asset existence for all the assets -- maybe just check all assets in the DB
-    return new ArrayList<>();
+    UpdatesController controller = UpdatesController.getInstance();
+    File updatesDirectory = controller.getUpdatesDirectory();
+
+    UpdatesDatabase database = controller.getDatabase();
+    DatabaseIntegrityCheck.run(database, updatesDirectory);
+    List<UpdateEntity> launchableUpdates = database.updateDao().loadLaunchableUpdatesForScope(controller.getUpdatesConfiguration().getScopeKey());
+
+    ArrayList<Update> availableUpdates = new ArrayList<>();
+    for (UpdateEntity updateEntity : launchableUpdates) {
+      AssetEntity launchAsset = database.updateDao().loadLaunchAsset(updateEntity.id);
+      if (launchAsset == null || launchAsset.relativePath == null) {
+        // this shouldn't happen since we just ran an integrity check, but just in case...
+        continue;
+      }
+      UpdateImpl update = new UpdateImpl(
+              updateEntity.id,
+              updateEntity.commitTime,
+              new File(updatesDirectory, launchAsset.relativePath),
+              updateEntity.metadata);
+      availableUpdates.add(update);
+    }
+    controller.releaseDatabase();
+
+    return availableUpdates;
   }
 
   @Override
@@ -69,10 +129,10 @@ public class UpdatesDevClientInterfaceImpl implements UpdatesDevClientInterface 
   }
 
   @Override
-  public void setCurrentUpdate(UpdateEntity update) {
+  public void setCurrentUpdate(Update update) {
     SelectionPolicy previousPolicy = UpdatesController.getInstance().getSelectionPolicy();
     UpdatesController.getInstance().setSelectionPolicy(new SelectionPolicy(
-            new LauncherSelectionPolicySingleUpdate(update),
+            new LauncherSelectionPolicySingleUpdate(update.getID()),
             previousPolicy.getLoaderSelectionPolicy(),
             previousPolicy.getReaperSelectionPolicy()));
   }
