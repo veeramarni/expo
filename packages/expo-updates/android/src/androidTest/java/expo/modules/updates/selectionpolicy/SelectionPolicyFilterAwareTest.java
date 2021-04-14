@@ -1,6 +1,8 @@
-package expo.modules.updates.launcher;
+package expo.modules.updates.selectionpolicy;
 
 import android.net.Uri;
+
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,7 +15,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 import expo.modules.updates.UpdatesConfiguration;
 import expo.modules.updates.db.entity.UpdateEntity;
 import expo.modules.updates.manifest.NewManifest;
@@ -21,7 +22,7 @@ import expo.modules.updates.manifest.NewManifest;
 @RunWith(AndroidJUnit4ClassRunner.class)
 public class SelectionPolicyFilterAwareTest {
   JSONObject manifestFilters;
-  SelectionPolicyFilterAware selectionPolicy;
+  SelectionPolicy selectionPolicy;
 
   UpdateEntity updateDefault1;
   UpdateEntity updateDefault2;
@@ -34,7 +35,7 @@ public class SelectionPolicyFilterAwareTest {
   @Before
   public void setup() throws JSONException {
     manifestFilters = new JSONObject("{\"branchname\": \"rollout\"}");
-    selectionPolicy = new SelectionPolicyFilterAware("1.0");
+    selectionPolicy = SelectionPolicyFactory.createFilterAwarePolicy("1.0");
 
     HashMap<String, Object> configMap = new HashMap<>();
     configMap.put("updateUrl", Uri.parse("https://exp.host/@test/test"));
@@ -129,20 +130,20 @@ public class SelectionPolicyFilterAwareTest {
   @Test
   public void testMatchesFilters_MultipleFilters() throws JSONException {
     // if there are multiple filters, a manifest must match them all to pass
-    Assert.assertFalse(SelectionPolicyFilterAware.matchesFilters(updateMultipleFilters, new JSONObject("{\"firstkey\": \"value1\", \"secondkey\": \"wrong-value\"}")));
-    Assert.assertTrue(SelectionPolicyFilterAware.matchesFilters(updateMultipleFilters, new JSONObject("{\"firstkey\": \"value1\", \"secondkey\": \"value2\"}")));
+    Assert.assertFalse(SelectionPolicyUtils.matchesFilters(updateMultipleFilters, new JSONObject("{\"firstkey\": \"value1\", \"secondkey\": \"wrong-value\"}")));
+    Assert.assertTrue(SelectionPolicyUtils.matchesFilters(updateMultipleFilters, new JSONObject("{\"firstkey\": \"value1\", \"secondkey\": \"value2\"}")));
   }
 
   @Test
   public void testMatchesFilters_EmptyMatchesAll() throws JSONException {
     // no field is counted as a match
-    Assert.assertTrue(SelectionPolicyFilterAware.matchesFilters(updateDefault1, new JSONObject("{\"field-that-update-doesnt-have\": \"value\"}")));
+    Assert.assertTrue(SelectionPolicyUtils.matchesFilters(updateDefault1, new JSONObject("{\"field-that-update-doesnt-have\": \"value\"}")));
   }
 
   @Test
-  public void testMatchesFilters_Null() throws JSONException {
+  public void testMatchesFilters_Null() {
     // null filters or null updateMetadata (i.e. bare or legacy manifests) is counted as a match
-    Assert.assertTrue(SelectionPolicyFilterAware.matchesFilters(updateDefault1, null));
-    Assert.assertTrue(SelectionPolicyFilterAware.matchesFilters(updateNoMetadata, manifestFilters));
+    Assert.assertTrue(SelectionPolicyUtils.matchesFilters(updateDefault1, null));
+    Assert.assertTrue(SelectionPolicyUtils.matchesFilters(updateNoMetadata, manifestFilters));
   }
 }

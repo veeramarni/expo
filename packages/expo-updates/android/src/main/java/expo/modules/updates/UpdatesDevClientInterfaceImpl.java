@@ -10,9 +10,9 @@ import expo.modules.updates.db.UpdatesDatabase;
 import expo.modules.updates.db.entity.AssetEntity;
 import expo.modules.updates.db.entity.UpdateEntity;
 import expo.modules.updates.launcher.Launcher;
-import expo.modules.updates.launcher.SelectionPolicySingleUpdate;
 import expo.modules.updates.loader.RemoteLoader;
 import expo.modules.updates.manifest.Manifest;
+import expo.modules.updates.selectionpolicy.LauncherSelectionPolicySingleUpdate;
 
 public class UpdatesDevClientInterfaceImpl implements UpdatesDevClientInterface {
   @Override
@@ -69,6 +69,6 @@ public class UpdatesDevClientInterfaceImpl implements UpdatesDevClientInterface 
 
   @Override
   public void setCurrentUpdate(UpdateEntity update) {
-    UpdatesController.getInstance().setLaunchSelectionPolicy(new SelectionPolicySingleUpdate(update));
+//    UpdatesController.getInstance().setLaunchSelectionPolicy(new LauncherSelectionPolicySingleUpdate(update));
   }
 }
