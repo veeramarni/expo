@@ -54,12 +54,6 @@ public class UpdatesController {
   private SelectionPolicy mSelectionPolicy;
   private FileDownloader mFileDownloader;
 
-  /**
-   * Separate SelectionPolicy used only for launches; allows other modules (e.g. the dev client)
-   * to control which update is launched.
-   */
-  private SelectionPolicy mLaunchSelectionPolicy;
-
   // launch conditions
   private boolean mIsLoaderTaskFinished = false;
   private boolean mIsEmergencyLaunch = false;
@@ -67,7 +61,7 @@ public class UpdatesController {
   private UpdatesController(Context context, UpdatesConfiguration updatesConfiguration) {
     mUpdatesConfiguration = updatesConfiguration;
     mDatabaseHolder = new DatabaseHolder(UpdatesDatabase.getInstance(context));
-    mSelectionPolicy = SelectionPolicyFactory.createFilterAwarePolicy(UpdatesUtils.getRuntimeVersion(updatesConfiguration));
+    mSelectionPolicy = defaultSelectionPolicy();
     mFileDownloader = new FileDownloader(context);
     if (context instanceof ReactApplication) {
       mReactNativeHost = new WeakReference<>(((ReactApplication) context).getReactNativeHost());
@@ -79,6 +73,10 @@ public class UpdatesController {
       mUpdatesDirectoryException = e;
       mUpdatesDirectory = null;
     }
+  }
+
+  private SelectionPolicy defaultSelectionPolicy() {
+    return SelectionPolicyFactory.createFilterAwarePolicy(UpdatesUtils.getRuntimeVersion(mUpdatesConfiguration));
   }
 
   public static UpdatesController getInstance() {
@@ -228,8 +226,12 @@ public class UpdatesController {
 
   // internal setters
 
-  /* package */ void setLaunchSelectionPolicy(SelectionPolicy selectionPolicy) {
-    mLaunchSelectionPolicy = selectionPolicy;
+  /* package */ void setSelectionPolicy(SelectionPolicy selectionPolicy) {
+    mSelectionPolicy = selectionPolicy;
+  }
+
+  /* package */ void resetSelectionPolicyToDefault() {
+    mSelectionPolicy = defaultSelectionPolicy();
   }
 
   /**
@@ -247,7 +249,6 @@ public class UpdatesController {
       mIsEmergencyLaunch = true;
     }
 
-    // TODO: mLaunchSelectionPolicy
     new LoaderTask(mUpdatesConfiguration, mDatabaseHolder, mUpdatesDirectory, mFileDownloader, mSelectionPolicy, new LoaderTask.LoaderTaskCallback() {
       @Override
       public void onFailure(Exception e) {
@@ -316,7 +317,7 @@ public class UpdatesController {
     final String oldLaunchAssetFile = mLauncher.getLaunchAssetFile();
 
     UpdatesDatabase database = getDatabase();
-    final DatabaseLauncher newLauncher = new DatabaseLauncher(mUpdatesConfiguration, mUpdatesDirectory, mFileDownloader, mLaunchSelectionPolicy);
+    final DatabaseLauncher newLauncher = new DatabaseLauncher(mUpdatesConfiguration, mUpdatesDirectory, mFileDownloader, mSelectionPolicy);
     newLauncher.launch(database, context, new Launcher.LauncherCallback() {
       @Override
       public void onFailure(Exception e) {

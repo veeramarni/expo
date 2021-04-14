@@ -13,6 +13,7 @@ import expo.modules.updates.launcher.Launcher;
 import expo.modules.updates.loader.RemoteLoader;
 import expo.modules.updates.manifest.Manifest;
 import expo.modules.updates.selectionpolicy.LauncherSelectionPolicySingleUpdate;
+import expo.modules.updates.selectionpolicy.SelectionPolicy;
 
 public class UpdatesDevClientInterfaceImpl implements UpdatesDevClientInterface {
   @Override
@@ -69,6 +70,10 @@ public class UpdatesDevClientInterfaceImpl implements UpdatesDevClientInterface 
 
   @Override
   public void setCurrentUpdate(UpdateEntity update) {
-//    UpdatesController.getInstance().setLaunchSelectionPolicy(new LauncherSelectionPolicySingleUpdate(update));
+    SelectionPolicy previousPolicy = UpdatesController.getInstance().getSelectionPolicy();
+    UpdatesController.getInstance().setSelectionPolicy(new SelectionPolicy(
+            new LauncherSelectionPolicySingleUpdate(update),
+            previousPolicy.getLoaderSelectionPolicy(),
+            previousPolicy.getReaperSelectionPolicy()));
   }
 }
