@@ -213,11 +213,11 @@ public class UpdatesModule extends ExportedModule {
               @Override
               public void onSuccess(@Nullable UpdateEntity update) {
                 databaseHolder.releaseDatabase();
-                updatesService.resetSelectionPolicy();
                 Bundle updateInfo = new Bundle();
                 if (update == null) {
                   updateInfo.putBoolean("isNew", false);
                 } else {
+                  updatesService.resetSelectionPolicy();
                   updateInfo.putBoolean("isNew", true);
                   updateInfo.putString("manifestString", update.metadata.toString());
                 }

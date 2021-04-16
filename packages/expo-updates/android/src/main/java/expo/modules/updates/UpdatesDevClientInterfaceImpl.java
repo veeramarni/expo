@@ -16,7 +16,9 @@ import expo.modules.updates.db.DatabaseIntegrityCheck;
 import expo.modules.updates.db.UpdatesDatabase;
 import expo.modules.updates.db.entity.AssetEntity;
 import expo.modules.updates.db.entity.UpdateEntity;
+import expo.modules.updates.db.enums.UpdateStatus;
 import expo.modules.updates.launcher.Launcher;
+import expo.modules.updates.loader.EmbeddedLoader;
 import expo.modules.updates.loader.RemoteLoader;
 import expo.modules.updates.manifest.Manifest;
 import expo.modules.updates.selectionpolicy.LauncherSelectionPolicySingleUpdate;
@@ -55,14 +57,15 @@ public class UpdatesDevClientInterfaceImpl implements UpdatesDevClientInterface 
   }
 
   @Override
-  public List<Update> getAvailableUpdates() {
+  public List<Update> getAvailableUpdates(Context context) {
     // TODO: should this get any embedded updates as well?
     UpdatesController controller = UpdatesController.getInstance();
     File updatesDirectory = controller.getUpdatesDirectory();
+    UpdatesConfiguration configuration = controller.getUpdatesConfiguration();
 
     UpdatesDatabase database = controller.getDatabase();
-    DatabaseIntegrityCheck.run(database, updatesDirectory);
-    List<UpdateEntity> launchableUpdates = database.updateDao().loadLaunchableUpdatesForScope(controller.getUpdatesConfiguration().getScopeKey());
+    DatabaseIntegrityCheck.run(database, updatesDirectory, configuration, context);
+    List<UpdateEntity> launchableUpdates = database.updateDao().loadLaunchableUpdatesForScope(configuration.getScopeKey());
 
     ArrayList<Update> availableUpdates = new ArrayList<>();
     for (UpdateEntity updateEntity : launchableUpdates) {

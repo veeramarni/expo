@@ -33,7 +33,7 @@ public interface UpdatesDevClientInterface {
     @Nullable JSONObject getManifest();
   }
 
-  List<Update> getAvailableUpdates();
+  List<Update> getAvailableUpdates(Context context);
   void fetchUpdateWithConfiguration(UpdatesConfiguration configuration, Context context, FetchCallback callback);
   void reload(Context context, ReloadCallback callback);
   void setCurrentUpdate(Update update);
