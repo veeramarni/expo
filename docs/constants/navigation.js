@@ -87,10 +87,9 @@ const sections = [
     name: 'Development Clients',
     reference: [
       'Introduction',
+      'Getting Started',
       'Installation',
       'Building With EAS',
-      'Building iOS Locally',
-      'Building Android Locally',
       'Extending the Development Menu',
     ],
   },
@@ -196,6 +195,7 @@ const sections = [
       'Implementing a checkbox for Expo and React Native apps',
       'Stacking overlapping views with zIndex in Expo and React Native apps',
       'Using SVGs',
+      'How to display a popup toast',
     ],
   },
   {
