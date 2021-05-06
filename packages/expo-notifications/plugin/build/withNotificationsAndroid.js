@@ -11,6 +11,7 @@ const { Colors } = config_plugins_1.AndroidConfig;
 const { ANDROID_RES_PATH, dpiValues } = config_plugins_1.AndroidConfig.Icon;
 const { addMetaDataItemToMainApplication, getMainApplicationOrThrow, removeMetaDataItemFromMainApplication, } = config_plugins_1.AndroidConfig.Manifest;
 const BASELINE_PIXEL_SIZE = 24;
+const ERROR_MSG_PREFIX = 'An error occurred while configuring Android notifications. ';
 exports.META_DATA_NOTIFICATION_ICON = 'expo.modules.notifications.default_notification_icon';
 exports.META_DATA_NOTIFICATION_ICON_COLOR = 'expo.modules.notifications.default_notification_color';
 exports.NOTIFICATION_ICON = 'notification_icon';
@@ -127,7 +128,7 @@ async function writeNotificationIconImageFilesAsync(icon, projectRoot) {
             fs_1.writeFileSync(path_1.resolve(dpiFolderPath, exports.NOTIFICATION_ICON + '.png'), resizedIcon);
         }
         catch (e) {
-            throw new Error('Encountered an issue resizing Android notification icon: ' + e);
+            throw new Error(ERROR_MSG_PREFIX + 'Encountered an issue resizing Android notification icon: ' + e);
         }
     }));
 }
@@ -143,7 +144,8 @@ function removeNotificationIconImageFiles(projectRoot) {
  */
 function setNotificationSounds(projectRoot, sounds) {
     if (!Array.isArray(sounds)) {
-        throw new Error(`Must provide an array of sound files in your app config, found ${typeof sounds}.`);
+        throw new Error(ERROR_MSG_PREFIX +
+            `Must provide an array of sound files in your app config, found ${typeof sounds}.`);
     }
     for (const soundFileRelativePath of sounds) {
         writeNotificationSoundFile(soundFileRelativePath, projectRoot);
@@ -167,7 +169,7 @@ function writeNotificationSoundFile(soundFileRelativePath, projectRoot) {
             fs_1.copyFileSync(sourceFilepath, destinationFilepath);
         }
         catch (e) {
-            throw new Error('Encountered an issue copying Android notification sounds: ' + e);
+            throw new Error(ERROR_MSG_PREFIX + 'Encountered an issue copying Android notification sounds: ' + e);
         }
     }
 }

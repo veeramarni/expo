@@ -24,6 +24,7 @@ const {
   removeMetaDataItemFromMainApplication,
 } = AndroidConfig.Manifest;
 const BASELINE_PIXEL_SIZE = 24;
+const ERROR_MSG_PREFIX = 'An error occurred while configuring Android notifications. ';
 export const META_DATA_NOTIFICATION_ICON = 'expo.modules.notifications.default_notification_icon';
 export const META_DATA_NOTIFICATION_ICON_COLOR =
   'expo.modules.notifications.default_notification_color';
@@ -166,7 +167,9 @@ async function writeNotificationIconImageFilesAsync(icon: string, projectRoot: s
         ).source;
         writeFileSync(resolve(dpiFolderPath, NOTIFICATION_ICON + '.png'), resizedIcon);
       } catch (e) {
-        throw new Error('Encountered an issue resizing Android notification icon: ' + e);
+        throw new Error(
+          ERROR_MSG_PREFIX + 'Encountered an issue resizing Android notification icon: ' + e
+        );
       }
     })
   );
@@ -186,7 +189,8 @@ function removeNotificationIconImageFiles(projectRoot: string) {
 export function setNotificationSounds(projectRoot: string, sounds: string[]) {
   if (!Array.isArray(sounds)) {
     throw new Error(
-      `Must provide an array of sound files in your app config, found ${typeof sounds}.`
+      ERROR_MSG_PREFIX +
+        `Must provide an array of sound files in your app config, found ${typeof sounds}.`
     );
   }
   for (const soundFileRelativePath of sounds) {
@@ -211,7 +215,9 @@ function writeNotificationSoundFile(soundFileRelativePath: string, projectRoot: 
       }
       copyFileSync(sourceFilepath, destinationFilepath);
     } catch (e) {
-      throw new Error('Encountered an issue copying Android notification sounds: ' + e);
+      throw new Error(
+        ERROR_MSG_PREFIX + 'Encountered an issue copying Android notification sounds: ' + e
+      );
     }
   }
 }
