@@ -5,6 +5,7 @@
 ### 🛠 Breaking changes
 
 ### 🎉 New features
+- Add warning for splash screen if visible for too long
 
 ### 🐛 Bug fixes
 
